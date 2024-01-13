@@ -3,82 +3,48 @@ from math import sqrt
 
 class Board:
     """
-    Classe utilisée pour modéliser un plateau.
+    Classe utilisée pour modéliser un plateau de jeu.
+    Ses dimensions doivent être comprises entre 4 et 10 inclus et être pairs.
+    Chaque case du plateau est représentée par son couple de coordonnées avec sa valeur :
+        * 0 pour les cases vides
+        * 1 pour les pions blancs
+        * -1 pour les pions noirs
+    de la forme suivante dans un dictionnaire : {(x, y): value, ...}.
 
         Attributs :
             cases (dict) : Un dictionnaire contenant toutes les cases du jeu avec leurs valeurs.
             taille (int) : Taille du plateau, c'est-à-dire la taille de sa largeur et de sa hauteur.
-            cases_vides (list) : La liste des cases vides du plateau.
+            coups_possible (dict) : Un dictionnaire contenant les coups possible pouvant être joués.
 
         Interface :
-            update_cases_vides() : Met à jour la liste des cases vides 'self.vides'.
-            est_vide(...) : Retourne si oui ou non une case est vide.
             case_valide(...) : Vérifie si les coordonnées d'une case sont bien valide.
-            get_vides(...) : Retourne la liste des cases vides.
+            etat_case(...) : Renvoie la valeur d'une case, et si la case n'est pas valide renvoie None.
             joue(...) : Vérifie et applique un coup sur le plateau.
+            update_coups_possible(...) : Met à jour les coups possibles.
             __str__() : Renvoie la représentation en chaîne de caractère du plateau.
     """
+
     def __init__(self, taille: int | None = 8, cases: dict | None = None):
-        self.cases_vides = []
-        if not cases:
+        self.coups_possible = {1: {}, -1: {}}
+        if cases is None:
             assert 4 <= taille <= 10 and taille % 2 == 0
             self.taille = taille
-            end_i_noir = ((self.taille - 2) // 2) - 1
-            end_i_blanc = (self.taille // 2) + 1
             self.cases = {}
             for i in range(self.taille):
                 for j in range(self.taille):
-                    if (0 <= i <= end_i_noir) and ((j + (i % 2)) % 2):
+                    if (0 <= i <= (((self.taille - 2) // 2) - 1)) and ((j + (i % 2)) % 2):
                         self.cases[(i, j)] = -1
-                    elif (i >= end_i_blanc) and ((j + (i % 2)) % 2):
+                    elif (i >= ((self.taille // 2) + 1)) and ((j + (i % 2)) % 2):
                         self.cases[(i, j)] = 1
                     else:
                         self.cases[(i, j)] = 0
-                        self.cases_vides.append((i, j))
         else:
-            taille = sqrt(len(self.cases))
+            taille = sqrt(len(self.cases))  # ajouter plus de vérification
             assert taille % 2 == 0 and 4 <= taille <= 10
             self.taille = int(taille)
             self.cases = cases
-            self.update_cases_vides()
-
-    def update_cases_vides(self):
-        """
-        Met à jour la liste des cases vides contenue dans 'self.cases_vides'.
-        """
-        self.cases_vides = []
-        for i in range(self.taille):
-            for j in range(self.taille):
-                if self.cases[(i, j)] == 0:
-                    self.cases_vides.append((i, j))
-
-    def est_vide(self, case: tuple):
-        """
-        Vérifie si une case est vide ou non.
-
-            Paramètre :
-                case (tuple) : Tuple de deux entiers contenant les coordonnées de la case.
-
-            Retourne :
-                bool : True si la case est vide, sinon False.
-        """
-        return self.cases[case] == 0
-
-    def get_vides(self, update: bool | None = False):
-        """
-        Met à jour les cases vides si 'update' est à True et retourne la liste des cases vides,
-        c'est-à-dire 'self.cases_vides'.
-
-            Paramètre :
-                update (bool) : Si True, met à jour les cases vides avec la méthode 'self.update_cases_vides'.
-
-            Retourne :
-                list: Retourne self.cases_vides.
-        """
-        if update:
-            self.update_cases_vides()
-            return self.cases_vides
-        return self.cases_vides
+        self.update_coups_possible(joueur=1)
+        self.update_coups_possible(joueur=-1)
 
     def case_valide(self, case: tuple):
         """
@@ -92,19 +58,77 @@ class Board:
         """
         return all(0 <= coord <= (self.taille - 1) for coord in case)
 
-    def joue(self, case: tuple, valeur_pion: int):
+    def etat_case(self, case: tuple):
         """
-        Vérifie et applique le coup s'il est valide sur le plateau, c'est-à-dire vérifie que la case 'case' soit comprise
-        dans le plateau et qu'elle soit vide, et ensuite applique la valeur du pion 'valeur_pion' sur cette case.
+        Retourne la valeur d'une case (-1, 0 ou 1), et si les coordonnées de la case ne font pas parties du plateau None.
 
             Paramètre :
-                case (tuple) : La case ou appliquer le coup.
-                valeur_pion (int) : La valeur du pion du coup.
+                case (tuple) : Tuple de deux entiers contenant les coordonnées de la case.
+
+            Retourne :
+                int : La valeur de la case si cette dernière est valide.
+                NoneType : None si la case n'est pas valide.
         """
-        if not (self.case_valide(case=case) and (self.est_vide(case=case))):
-            raise ValueError("Case invalide")
-        self.cases[case] = valeur_pion
-        self.update_cases_vides()
+        if not self.case_valide(case=case):
+            return None
+        return self.cases[case]
+
+    def update_coups_possible(self, joueur: int):
+        """
+        Met à jour la liste des coups possible 'self.coups_possible' pour un joueur (-1 : noirs et 1 : blancs).
+
+            Paramètre :
+                case (tuple) : Tuple de deux entiers contenant les coordonnées de la case.
+        """
+        assert joueur == 1 or joueur == -1, "Joueur invalide !"
+        self.coups_possible[joueur] = {}
+        for case, valeur_case in self.cases.items():
+            if valeur_case == joueur:
+                self.coups_possible[joueur][case] = []
+                cg = (case[0] - joueur, case[1] - 1)  # case gauche
+                cd = (case[0] - joueur, case[1] + 1)  # case droite
+                cg_2 = (cg[0] - joueur, cg[1] - 1)  # case gauche de la case gauche
+                cd_2 = (cd[0] - joueur, cd[1] + 1)  # case droite de la case droite
+                etat_cg = self.etat_case(case=cg)
+                etat_cd = self.etat_case(case=cd)
+                if etat_cg == 0:
+                    self.coups_possible[joueur][case].append(cg)
+                elif etat_cg == -joueur and self.etat_case(case=cg_2) == 0:
+                    self.coups_possible[joueur][case].append(cg_2)
+                if etat_cd == 0:
+                    self.coups_possible[joueur][case].append(cd)
+                elif etat_cd == -joueur and self.etat_case(case=cd_2) == 0:
+                    self.coups_possible[joueur][case].append(cd_2)
+                if len(self.coups_possible[joueur][case]) == 0:
+                    self.coups_possible[joueur].pop(case)
+
+    def joue(self, case_origine: tuple, case_destination: tuple):
+        """
+        Vérifie et applique le coup s'il est valide sur le plateau de jeu. Un coup est décomposé en deux cases :
+        la case d'origine et la case de destination. Deux coups différents peuvent être joués :
+            - un déplacement : il s'agit d'un déplacement de pion d'une case. La valeur de la case d'origine est
+                               simplement transféré à la case de destination
+            - une prise de pièce : un pion prend un pion adverse, c'est-à-dire qu'il lui passe au-dessus. La valeur de
+                                   la case d'origine est transféré à la case de destination et le pion entre le chemin
+                                   de ces deux cases est supprimé/
+
+            Paramètre :
+                case_origine (tuple) : Tuple de deux entiers contenant les coordonnées de la case d'origine.
+                case_destination (tuple) : Tuple de deux entiers contenant les coordonnées de la case de destination.
+        """
+        assert self.case_valide(case=case_origine), "Coordonnées de la case d'origine invalide !"
+        assert self.case_valide(case=case_destination), "Coordonnées de la case de destination invalide !"
+        valeur_pion = self.cases[case_origine]
+        assert valeur_pion != 0, "Impossible de jouer une case vide !"
+        if (case_origine in self.coups_possible[valeur_pion]) and (case_destination in self.coups_possible[valeur_pion][case_origine]):
+            self.cases[case_origine] = 0
+            self.cases[case_destination] = valeur_pion
+            if (abs(case_origine[0]-case_destination[0]) == 2) and (abs(case_origine[1]-case_destination[1]) == 2):
+                self.cases[((case_origine[0]+case_destination[0])//2, (case_origine[1]+case_destination[1])//2)] = 0
+            self.update_coups_possible(joueur=1)
+            self.update_coups_possible(joueur=-1)
+        else:
+            raise ValueError("Coup invalide : case d'origine/destination non présente dans les coups possibles !")
 
     def __str__(self):
         """
@@ -117,7 +141,7 @@ class Board:
         for k in range(self.taille):
             res += f" {k}"
         res += "\n"
-        res += "  ┌" + "─"*((self.taille*2)+1) + "┐\n"
+        res += "  ┌" + "─" * ((self.taille * 2) + 1) + "┐\n"
         for i in range(self.taille):
             res += str(i) + " │ "
             for j in range(self.taille):
@@ -139,6 +163,7 @@ class Square:
 
     /!\ Non implémentée !
     """
+
     def __init__(self):
         raise NotImplemented("Classe no implémentée !")
 
@@ -150,5 +175,6 @@ class Piece:
 
     /!\ Non implémentée !
     """
+
     def __init__(self):
         raise NotImplemented("Classe no implémentée !")
