@@ -21,6 +21,7 @@ class Board:
             etat_case(...) : Renvoie la valeur d'une case, et si la case n'est pas valide renvoie None.
             joue(...) : Vérifie et applique un coup sur le plateau.
             update_coups_possible(...) : Met à jour les coups possibles.
+            coup_valide(...) : Retourne si un coup est valide ou non sur le plateau de jeu.
             __str__() : Renvoie la représentation en chaîne de caractère du plateau.
     """
 
@@ -102,6 +103,27 @@ class Board:
                 if len(self.coups_possible[joueur][case]) == 0:
                     self.coups_possible[joueur].pop(case)
 
+    def coup_valide(self, case_origine: tuple, case_destination: tuple):
+        """
+        Retourne si un coup est valide ou non sur le plateau de jeu. Vérifie que les deux cases soient bien sûr le
+        plateau (que leurs coordonnées soient valides), que la case d'origine 'case_origine' soit bien une case d'un
+        joueur et que la case de destination 'case_destination' soit vide.
+
+            Paramètre :
+                case_origine (tuple) : Tuple de deux entiers contenant les coordonnées de la case d'origine.
+                case_destination (tuple) : Tuple de deux entiers contenant les coordonnées de la case de destination.
+
+            Retourne :
+                bool : True si le coup est valide et False dans le cas contraire.
+        """
+        if (not self.case_valide(case=case_origine)) or (not self.case_valide(case=case_destination)):
+            return False
+        valeur_case = self.cases[case_origine]
+        if valeur_case == 0:
+            return False
+        return ((case_origine in self.coups_possible[valeur_case])
+                and (case_destination in self.coups_possible[valeur_case][case_origine]))
+
     def joue(self, case_origine: tuple, case_destination: tuple):
         """
         Vérifie et applique le coup s'il est valide sur le plateau de jeu. Un coup est décomposé en deux cases :
@@ -116,11 +138,8 @@ class Board:
                 case_origine (tuple) : Tuple de deux entiers contenant les coordonnées de la case d'origine.
                 case_destination (tuple) : Tuple de deux entiers contenant les coordonnées de la case de destination.
         """
-        assert self.case_valide(case=case_origine), "Coordonnées de la case d'origine invalide !"
-        assert self.case_valide(case=case_destination), "Coordonnées de la case de destination invalide !"
-        valeur_pion = self.cases[case_origine]
-        assert valeur_pion != 0, "Impossible de jouer une case vide !"
-        if (case_origine in self.coups_possible[valeur_pion]) and (case_destination in self.coups_possible[valeur_pion][case_origine]):
+        if self.coup_valide(case_origine=case_origine, case_destination=case_destination):
+            valeur_pion = self.cases[case_origine]
             self.cases[case_origine] = 0
             self.cases[case_destination] = valeur_pion
             if (abs(case_origine[0]-case_destination[0]) == 2) and (abs(case_origine[1]-case_destination[1]) == 2):
