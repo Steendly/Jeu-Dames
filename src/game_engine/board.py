@@ -15,18 +15,29 @@ class Board:
             cases (dict) : Un dictionnaire contenant toutes les cases du jeu avec leurs valeurs.
             taille (int) : Taille du plateau, c'est-à-dire la taille de sa largeur et de sa hauteur.
             coups_possible (dict) : Un dictionnaire contenant les coups possible pouvant être joués.
+            nombre_pions (dict) : Un dictionnaire contenant le nombre de pions de chaque joueur.
 
         Interface :
+            get_cases() : Retourne les cases du plateau.
+            get_case(...) : Retourne la valeur de la case spécifiée si valide.
+            set_case(...) : Met à jour la valeur d'une case (si valide) avec la valeur spécifiée.
+            get_coups_possible(...) : Retourne les coups possibles pouvant être joués par un joueur.
+            update_coups_possible(...) : Met à jour les coups possibles.
+            get_nombre_pions(...) : Retourne le nombre de pions restant d'un joueur sur le plateau.
+            update_nombre_pions() : Met à jour le nombre de pions restant sur le plateau de tous les joueurs.
+            set_nombre_pions(...) : Met à jour le nombre de pions d'un ou plusieurs joueurs avec la valeur donné.
+            add_nombre_pions(...) : Augmente de 1 ou décrémente de moins -1 le nombre de pions restant d'un joueur.
+            joueur_valide(...) : Retourne si la valeur donnée d'un joueur est valide.
             case_valide(...) : Vérifie si les coordonnées d'une case sont bien valide.
             etat_case(...) : Renvoie la valeur d'une case, et si la case n'est pas valide renvoie None.
-            joue(...) : Vérifie et applique un coup sur le plateau.
-            update_coups_possible(...) : Met à jour les coups possibles.
             coup_valide(...) : Retourne si un coup est valide ou non sur le plateau de jeu.
+            joue(...) : Vérifie et applique un coup sur le plateau.
             __str__() : Renvoie la représentation en chaîne de caractère du plateau.
     """
 
     def __init__(self, taille: int | None = 8, cases: dict | None = None):
         self.coups_possible = {1: {}, -1: {}}
+        self.nombre_pions = {1: 0, -1: 0}
         if cases is None:
             assert 4 <= taille <= 10 and taille % 2 == 0
             self.taille = taille
@@ -46,6 +57,152 @@ class Board:
             self.cases = cases
         self.update_coups_possible(joueur=1)
         self.update_coups_possible(joueur=-1)
+        self.update_nombre_pions()
+
+    def get_cases(self):
+        """
+        Retourne les cases du plateau.
+
+            Retourne :
+                dict : Le dictionnaire des cases du plateau, c'est-à-dire 'self.cases'.
+        """
+        return self.cases
+
+    def get_case(self, case: tuple):
+        """
+        Retourne la valeur de la case spécifiée si valide.
+
+            Paramètre :
+                case (tuple) : Le couple de deux entiers représentant les coordonnées de la case.
+
+            Retourne :
+                int : La valeur de la case étant -1, 0 ou 1.
+        """
+        assert self.case_valide(case=case), "Case invalide !"
+        return self.cases[case]
+
+    def set_case(self, case: tuple, valeur: int):
+        """
+        Met à jour la valeur d'une case (si valide) avec la valeur spécifiée.
+
+            Paramètres :
+                case (tuple) : Tuple de deux entiers contenant les coordonnées de la case.
+                valeur (int) : La valeur nouvelle valeur de la case.
+        """
+        assert self.case_valide(case=case), "Coordonnées de la case invalide !"
+        assert valeur in [-1, 0, 1], "Valeur de la case invalide !"
+        self.cases[case] = valeur
+
+    def get_coups_possible(self, joueur: int):
+        """
+        Retourne les coups possibles pouvant être joués par un joueur.
+
+            Paramètre :
+                joueur (int) : Le couple de deux entiers représentant les coordonnées de la case.
+
+            Retourne :
+                dict : Un dictionnaire contenant les coups possible d'un joueur avec comme clé les coordonnées de la
+                       case d'origine et comme valeurs une liste des cases de destinations.
+        """
+        assert self.joueur_valide(joueur=joueur), "Joueur invalide !"
+        return self.coups_possible[joueur]
+
+    def update_coups_possible(self, joueur: int):
+        """
+        Met à jour la liste des coups possible 'self.coups_possible' pour un joueur (-1 : noirs et 1 : blancs).
+
+            Paramètre :
+                case (tuple) : Tuple de deux entiers contenant les coordonnées de la case.
+        """
+        assert self.joueur_valide(joueur=joueur), "Joueur invalide !"
+        self.coups_possible[joueur] = {}
+        for case, valeur_case in self.cases.items():
+            if valeur_case == joueur:
+                self.coups_possible[joueur][case] = []
+                cg = (case[0] - joueur, case[1] - 1)  # case gauche
+                cd = (case[0] - joueur, case[1] + 1)  # case droite
+                cg_2 = (cg[0] - joueur, cg[1] - 1)  # case gauche de la case gauche
+                cd_2 = (cd[0] - joueur, cd[1] + 1)  # case droite de la case droite
+                etat_cg = self.etat_case(case=cg)
+                etat_cd = self.etat_case(case=cd)
+                if etat_cg == 0:
+                    self.coups_possible[joueur][case].append(cg)
+                elif etat_cg == -joueur and self.etat_case(case=cg_2) == 0:
+                    self.coups_possible[joueur][case].append(cg_2)
+                    self.nombre_pions[-joueur] -= 1
+                if etat_cd == 0:
+                    self.coups_possible[joueur][case].append(cd)
+                elif etat_cd == -joueur and self.etat_case(case=cd_2) == 0:
+                    self.coups_possible[joueur][case].append(cd_2)
+                    self.nombre_pions[-joueur] -= 1
+                if len(self.coups_possible[joueur][case]) == 0:
+                    self.coups_possible[joueur].pop(case)
+
+    def get_nombre_pions(self, joueur: int):
+        """
+        Retourne le nombre de pions restant d'un joueur sur le plateau.
+
+            Paramètre :
+                joueur (int) : La valeur du joueur, 1 pour les blancs et -1 pour les noirs.
+
+            Retourne :
+                int : Le nombre de pions restant du joueur spécifié.
+        """
+        assert self.joueur_valide(joueur=joueur), "Joueur invalide !"
+        return self.nombre_pions[joueur]
+
+    def update_nombre_pions(self):
+        """
+        Met à jour le nombre de pions restant sur le plateau de tous les joueurs.
+        """
+        self.nombre_pions[1] = 0
+        self.nombre_pions[-1] = 0
+        for valeur_case in self.cases.values():
+            if valeur_case:
+                self.nombre_pions[valeur_case] += 1
+
+    def set_nombre_pions(self, valeur: int, joueur: int | None = None):
+        """
+        Met à jour le nombre de pions d'un ou plusieurs joueurs avec la valeur donné :
+        Si le paramètre 'joueur' est spécifié, seul le nombre de pions restant sur le plateau de ce joueur est
+        actualisé, sinon tous les joueurs sont actualisés avec cette valeur.
+
+            Paramètres :
+                valeur (int) : Le nouveau nombre de pions restant.
+                joueur (int | None) : La valeur du joueur devant être mis à jour. 1 pour les blancs, -1 pour les noirs
+                                      et None pour les deux.
+        """
+        assert valeur >= 0, "Un nombre de pion négatif n'est pas possible !"
+        if joueur is None:
+            self.nombre_pions[1] = valeur
+            self.nombre_pions[-1] = valeur
+        else:
+            assert self.joueur_valide(joueur=joueur), "Joueur invalide !"
+            self.nombre_pions[joueur] = valeur
+
+    def add_nombre_pions(self, joueur: int, valeur: int):
+        """
+        Augmente de 1 ou décrémente de moins -1 le nombre de pions restant d'un joueur sur le plateau en fonction du
+        paramètre 'valeur'.
+
+            Paramètres :
+                joueur (int) : La valeur du joueur devant être mis à jour. 1 pour les blancs, -1 pour les noirs.
+                valeur (int) : La valeur qui va être ajouté (ou enlevé) du nombre de pions restant du joueur. Peut
+                               seulement être égale à 1 ou -1.
+        """
+        assert self.joueur_valide(joueur=joueur), "Joueur invalide !"
+        assert valeur == 1 or valeur == -1, "Seulement possible d'ajouter 1 ou -1 !"
+        self.nombre_pions[joueur] += valeur
+
+    def joueur_valide(self, joueur: int):
+        """
+        Retourne si un joueur est valide, c'est-à-dire si son numéro correspond bien à 1 ou -1 (1 pour les blancs et
+        -1 pour les noirs).
+
+            Paramètre :
+                 joueur (int) : La valeur du joueur.
+        """
+        return joueur == 1 or joueur == -1
 
     def case_valide(self, case: tuple):
         """
@@ -72,36 +229,7 @@ class Board:
         """
         if not self.case_valide(case=case):
             return None
-        return self.cases[case]
-
-    def update_coups_possible(self, joueur: int):
-        """
-        Met à jour la liste des coups possible 'self.coups_possible' pour un joueur (-1 : noirs et 1 : blancs).
-
-            Paramètre :
-                case (tuple) : Tuple de deux entiers contenant les coordonnées de la case.
-        """
-        assert joueur == 1 or joueur == -1, "Joueur invalide !"
-        self.coups_possible[joueur] = {}
-        for case, valeur_case in self.cases.items():
-            if valeur_case == joueur:
-                self.coups_possible[joueur][case] = []
-                cg = (case[0] - joueur, case[1] - 1)  # case gauche
-                cd = (case[0] - joueur, case[1] + 1)  # case droite
-                cg_2 = (cg[0] - joueur, cg[1] - 1)  # case gauche de la case gauche
-                cd_2 = (cd[0] - joueur, cd[1] + 1)  # case droite de la case droite
-                etat_cg = self.etat_case(case=cg)
-                etat_cd = self.etat_case(case=cd)
-                if etat_cg == 0:
-                    self.coups_possible[joueur][case].append(cg)
-                elif etat_cg == -joueur and self.etat_case(case=cg_2) == 0:
-                    self.coups_possible[joueur][case].append(cg_2)
-                if etat_cd == 0:
-                    self.coups_possible[joueur][case].append(cd)
-                elif etat_cd == -joueur and self.etat_case(case=cd_2) == 0:
-                    self.coups_possible[joueur][case].append(cd_2)
-                if len(self.coups_possible[joueur][case]) == 0:
-                    self.coups_possible[joueur].pop(case)
+        return self.get_case(case=case)
 
     def coup_valide(self, case_origine: tuple, case_destination: tuple):
         """
@@ -109,7 +237,7 @@ class Board:
         plateau (que leurs coordonnées soient valides), que la case d'origine 'case_origine' soit bien une case d'un
         joueur et que la case de destination 'case_destination' soit vide.
 
-            Paramètre :
+            Paramètres :
                 case_origine (tuple) : Tuple de deux entiers contenant les coordonnées de la case d'origine.
                 case_destination (tuple) : Tuple de deux entiers contenant les coordonnées de la case de destination.
 
@@ -118,11 +246,11 @@ class Board:
         """
         if (not self.case_valide(case=case_origine)) or (not self.case_valide(case=case_destination)):
             return False
-        valeur_case = self.cases[case_origine]
+        valeur_case = self.get_case(case=case_origine)
         if valeur_case == 0:
             return False
-        return ((case_origine in self.coups_possible[valeur_case])
-                and (case_destination in self.coups_possible[valeur_case][case_origine]))
+        return ((case_origine in self.get_coups_possible(joueur=valeur_case))
+                and (case_destination in self.get_coups_possible(joueur=valeur_case)[case_origine]))
 
     def joue(self, case_origine: tuple, case_destination: tuple):
         """
@@ -134,16 +262,15 @@ class Board:
                                    la case d'origine est transféré à la case de destination et le pion entre le chemin
                                    de ces deux cases est supprimé/
 
-            Paramètre :
+            Paramètres :
                 case_origine (tuple) : Tuple de deux entiers contenant les coordonnées de la case d'origine.
                 case_destination (tuple) : Tuple de deux entiers contenant les coordonnées de la case de destination.
         """
         if self.coup_valide(case_origine=case_origine, case_destination=case_destination):
-            valeur_pion = self.cases[case_origine]
-            self.cases[case_origine] = 0
-            self.cases[case_destination] = valeur_pion
+            self.set_case(case=case_destination, valeur=self.get_case(case=case_origine))
+            self.set_case(case=case_origine, valeur=0)
             if (abs(case_origine[0]-case_destination[0]) == 2) and (abs(case_origine[1]-case_destination[1]) == 2):
-                self.cases[((case_origine[0]+case_destination[0])//2, (case_origine[1]+case_destination[1])//2)] = 0
+                self.set_case(case=((case_origine[0]+case_destination[0])//2, (case_origine[1]+case_destination[1])//2), valeur=0)
             self.update_coups_possible(joueur=1)
             self.update_coups_possible(joueur=-1)
         else:
