@@ -31,6 +31,7 @@ class Board:
             case_valide(...) : Vérifie si les coordonnées d'une case sont bien valide.
             etat_case(...) : Renvoie la valeur d'une case, et si la case n'est pas valide renvoie None.
             coup_valide(...) : Retourne si un coup est valide ou non sur le plateau de jeu.
+            etat() : Retourne l'état du plateau, c'est-à-dire si un joueur a gagné ou non.
             joue(...) : Vérifie et applique un coup sur le plateau.
             __str__() : Renvoie la représentation en chaîne de caractère du plateau.
     """
@@ -230,6 +231,20 @@ class Board:
         if not self.case_valide(case=case):
             return None
         return self.get_case(case=case)
+
+    def etat(self):
+        """
+        Retourne l'état actuel du plateau, c'est-à-dire 1/-1 si le joueur blanc/noir gagne, 0 en cas d'égalité et
+        sinon None.
+        """
+        if self.get_coups_possible(joueur=1) == 0 and self.get_coups_possible(joueur=-1) == 0:
+            return 0
+        elif self.get_nombre_pions(joueur=1) == 0 or len(self.get_coups_possible(joueur=1)) == 0:
+            return -1
+        elif self.get_nombre_pions(joueur=-1) == 0 or len(self.get_coups_possible(joueur=-1)) == 0:
+            return 1
+        else:
+            return None
 
     def coup_valide(self, case_origine: tuple, case_destination: tuple):
         """
