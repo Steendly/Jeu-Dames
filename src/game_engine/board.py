@@ -298,22 +298,26 @@ class Board:
             Retourne :
                 str : Le plateau sous forme d'une chaine de caractère.
         """
-        res = "   "
+        res = "    "
         for k in range(self.taille):
-            res += f" {k}"
+            res += f" {k} "
         res += "\n"
-        res += "  ┌" + "─" * ((self.taille * 2) + 1) + "┐\n"
+        res += "  ┌" + "─" * ((self.taille * 3) + 2) + "┐\n"
         for i in range(self.taille):
             res += str(i) + " │ "
             for j in range(self.taille):
-                if self.cases[(i, j)] == 1:
-                    res += "B "
-                elif self.cases[(i, j)] == -1:
-                    res += "N "
+                if (j + (i % 2)) % 2:
+                    res += "\x1b[1;37;40m"
                 else:
-                    res += ". "
-            res += "│\n"
-        res += "  └" + "─" * ((self.taille * 2) + 1) + "┘\n"
+                    res += "\x1b[1;37;47m"
+                if self.cases[(i, j)] == 1:
+                    res += " B "
+                elif self.cases[(i, j)] == -1:
+                    res += " N "
+                else:
+                    res += "   "
+            res += "\x1b[m │\n"
+        res += "  └" + "─" * ((self.taille * 3) + 2) + "┘\n"
         return res
 
 

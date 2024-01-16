@@ -9,6 +9,7 @@ algorithmes tels que MinMax et l'élagage alpha-bêta.
 
 ---
 
+
 ## Structure
 
 ```
@@ -41,3 +42,48 @@ algorithmes tels que MinMax et l'élagage alpha-bêta.
       * minmax.py : Implémentation de l’algorithme MinMax.
 
 ---
+
+
+## Utilisation
+
+Pour lancer le projet, exécuter la commande ci-dessous à sa racine :
+```bash
+python3 -m src.main
+```
+
+Voici un petit aperçu :
+```
+ ┌───────────────────────────────────────────────────────────────────────────┐
+ │  _______  __   __  _______  _______  ___   _  _______  ______    _______  │
+ │ |       ||  | |  ||       ||       ||   | | ||       ||    _ |  |       | │
+ │ |       ||  |_|  ||    ___||       ||   |_| ||    ___||   | ||  |  _____| │
+ │ |       ||       ||   |___ |       ||      _||   |___ |   |_||_ | |_____  │
+ │ |      _||       ||    ___||      _||     |_ |    ___||    __  ||_____  | │
+ │ |     |_ |   _   ||   |___ |     |_ |    _  ||   |___ |   |  | | _____| | │
+ │ |_______||__| |__||_______||_______||___| |_||_______||___|  |_||_______| │
+ └───────────────────────────────────────────────────────────────────────────┘
+
+    Choisissez le joueur blanc:
+        1. Joueur Humain (HumanPlayer)
+    --> 1
+
+    Choisissez le joueur noir:
+        1. Joueur Humain (HumanPlayer)
+    --> 1
+
+  ───────────────────────────────────────────────────────────────────────────
+
+     0  1  2  3  4  5  6  7 
+  ┌──────────────────────────┐
+0 │     N     N     N     N  │
+1 │  N     N     N     N     │
+2 │     N     N     N     N  │
+3 │                          │
+4 │                          │
+5 │  B     B     B     B     │
+6 │     B     B     B     B  │
+7 │  B     B     B     B     │
+  └──────────────────────────┘
+Entrez votre coup...
+```
+Le tout avec le plateau en couleur si vous l'exécuté dans un terminal supportant les séquences d'échappement ANSI.
