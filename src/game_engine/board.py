@@ -130,12 +130,10 @@ class Board:
                     self.coups_possible[joueur][case].append(cg)
                 elif etat_cg == -joueur and self.etat_case(case=cg_2) == 0:
                     self.coups_possible[joueur][case].append(cg_2)
-                    self.nombre_pions[-joueur] -= 1
                 if etat_cd == 0:
                     self.coups_possible[joueur][case].append(cd)
                 elif etat_cd == -joueur and self.etat_case(case=cd_2) == 0:
                     self.coups_possible[joueur][case].append(cd_2)
-                    self.nombre_pions[-joueur] -= 1
                 if len(self.coups_possible[joueur][case]) == 0:
                     self.coups_possible[joueur].pop(case)
 
@@ -237,11 +235,11 @@ class Board:
         Retourne l'état actuel du plateau, c'est-à-dire 1/-1 si le joueur blanc/noir gagne, 0 en cas d'égalité et
         sinon None.
         """
-        if self.get_coups_possible(joueur=1) == 0 and self.get_coups_possible(joueur=-1) == 0:
+        if len(self.get_coups_possible(joueur=1)) == 0 and len(self.get_coups_possible(joueur=-1)) == 0:
             return 0
-        elif self.get_nombre_pions(joueur=1) == 0 or len(self.get_coups_possible(joueur=1)) == 0:
+        elif self.get_nombre_pions(joueur=1) <= 0 or len(self.get_coups_possible(joueur=1)) == 0:
             return -1
-        elif self.get_nombre_pions(joueur=-1) == 0 or len(self.get_coups_possible(joueur=-1)) == 0:
+        elif self.get_nombre_pions(joueur=-1) <= 0 or len(self.get_coups_possible(joueur=-1)) == 0:
             return 1
         else:
             return None
@@ -284,8 +282,10 @@ class Board:
         if self.coup_valide(case_origine=case_origine, case_destination=case_destination):
             self.set_case(case=case_destination, valeur=self.get_case(case=case_origine))
             self.set_case(case=case_origine, valeur=0)
-            if (abs(case_origine[0]-case_destination[0]) == 2) and (abs(case_origine[1]-case_destination[1]) == 2):
-                self.set_case(case=((case_origine[0]+case_destination[0])//2, (case_origine[1]+case_destination[1])//2), valeur=0)
+            if (abs(case_destination[0]-case_origine[0]) == 2) and (abs(case_destination[1]-case_origine[1]) == 2):
+                case_milieu = ((case_origine[0]+case_destination[0])//2, (case_origine[1]+case_destination[1])//2)
+                self.add_nombre_pions(joueur=self.get_case(case=case_milieu), valeur=-1)
+                self.set_case(case=case_milieu, valeur=0)
             self.update_coups_possible(joueur=1)
             self.update_coups_possible(joueur=-1)
         else:

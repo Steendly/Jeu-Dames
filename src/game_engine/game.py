@@ -44,6 +44,7 @@ class GameEngine:
             input("Appuyez sur une touche...")
             print("\n")
             self.change_joueur()
+        print(self.plateau)
         input("Fin de la partie, appuyez sur une touche...")
 
 
