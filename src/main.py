@@ -1,5 +1,6 @@
 from src.game_engine.game import GameEngine
 from src.players.player import HumanPlayer
+from src.players.bots.bot import RandomBot
 
 
 def choix_joueur(couleur: str):
@@ -15,10 +16,12 @@ def choix_joueur(couleur: str):
     menu = f"""
     Choisissez le joueur {couleur}:
         1. Joueur Humain (HumanPlayer)
+        2. Bot aléatoire (RandomBot)
     --> """
 
     joueurs = {
-        "1": HumanPlayer
+        "1": HumanPlayer,
+        "2": RandomBot
     }
 
     choix = input(menu)
@@ -28,7 +31,8 @@ def choix_joueur(couleur: str):
 
 
 if __name__ == "__main__":
-    print(""" ┌───────────────────────────────────────────────────────────────────────────┐
+    print(""" 
+ ┌───────────────────────────────────────────────────────────────────────────┐
  │  _______  __   __  _______  _______  ___   _  _______  ______    _______  │
  │ |       ||  | |  ||       ||       ||   | | ||       ||    _ |  |       | │
  │ |       ||  |_|  ||    ___||       ||   |_| ||    ___||   | ||  |  _____| │
