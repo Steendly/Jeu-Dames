@@ -265,31 +265,42 @@ class Board:
         return ((case_origine in self.get_coups_possible(joueur=valeur_case))
                 and (case_destination in self.get_coups_possible(joueur=valeur_case)[case_origine]))
 
-    def joue(self, case_origine: tuple, case_destination: tuple):
+    def joue(self, case_origine: tuple, case_destination: tuple, coup_inverse: bool | None = False):
         """
         Vérifie et applique le coup s'il est valide sur le plateau de jeu. Un coup est décomposé en deux cases :
-        la case d'origine et la case de destination. Deux coups différents peuvent être joués :
+        la case d'origine et la case de destination. Trois coups différents peuvent être joués :
             - un déplacement : il s'agit d'un déplacement de pion d'une case. La valeur de la case d'origine est
                                simplement transféré à la case de destination
             - une prise de pièce : un pion prend un pion adverse, c'est-à-dire qu'il lui passe au-dessus. La valeur de
                                    la case d'origine est transféré à la case de destination et le pion entre le chemin
-                                   de ces deux cases est supprimé/
+                                   de ces deux cases est supprimé
+            - un coup inverse : il s'agit d'annuler une prise de pièce, ou un déplacement. Se comporte de la même
+                                manière que les deux autres coups possibles, à la différence qu'il n'est pas vérifié
+                                si la case d'origine et de destination sont présente dans les coups possibles.
 
             Paramètres :
                 case_origine (tuple) : Tuple de deux entiers contenant les coordonnées de la case d'origine.
                 case_destination (tuple) : Tuple de deux entiers contenant les coordonnées de la case de destination.
+                coup_inverse (bool | None) : Booléen qui indique s'il s'agit d'un coup inverse ou non.
         """
-        if self.coup_valide(case_origine=case_origine, case_destination=case_destination):
-            self.set_case(case=case_destination, valeur=self.get_case(case=case_origine))
-            self.set_case(case=case_origine, valeur=0)
-            if (abs(case_destination[0]-case_origine[0]) == 2) and (abs(case_destination[1]-case_origine[1]) == 2):
-                case_milieu = ((case_origine[0]+case_destination[0])//2, (case_origine[1]+case_destination[1])//2)
+        if coup_inverse and not (self.case_valide(case=case_origine) and self.case_valide(case=case_destination)):
+            raise ValueError("Coup inverse invalide : case d'origine/destination pas dans le plateau !")
+        if not coup_inverse and not self.coup_valide(case_origine=case_origine, case_destination=case_destination):
+            raise ValueError("Coup invalide : case d'origine/destination non présente dans les coups possibles !")
+
+        valeur_case_origine = self.get_case(case=case_origine)
+        self.set_case(case=case_destination, valeur=valeur_case_origine)
+        self.set_case(case=case_origine, valeur=0)
+        if (abs(case_destination[0]-case_origine[0]) == 2) and (abs(case_destination[1]-case_origine[1]) == 2):
+            case_milieu = ((case_origine[0]+case_destination[0])//2, (case_origine[1]+case_destination[1])//2)
+            if coup_inverse:
+                self.add_nombre_pions(joueur=valeur_case_origine*-1, valeur=1)
+                self.set_case(case=case_milieu, valeur=valeur_case_origine*-1)
+            else:
                 self.add_nombre_pions(joueur=self.get_case(case=case_milieu), valeur=-1)
                 self.set_case(case=case_milieu, valeur=0)
-            self.update_coups_possible(joueur=1)
-            self.update_coups_possible(joueur=-1)
-        else:
-            raise ValueError("Coup invalide : case d'origine/destination non présente dans les coups possibles !")
+        self.update_coups_possible(joueur=1)
+        self.update_coups_possible(joueur=-1)
 
     def __str__(self):
         """
