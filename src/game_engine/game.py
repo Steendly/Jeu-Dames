@@ -15,36 +15,7 @@ class GameEngine:
             change_joueur() : Change le joueur courant.
             run() : Fonction principale permettant de joueur une partie.
     """
-    def __init__(self, joueur_blanc: BasePlayer, joueur_noir: BasePlayer):
-        self.joueur_blanc = joueur_blanc
-        self.joueur_noir = joueur_noir
-        self.joueur_courant = joueur_blanc
-
-    def change_joueur(self):
-        if self.joueur_courant == self.joueur_blanc:
-            self.joueur_courant = self.joueur_noir
-        else:
-            self.joueur_courant = self.joueur_blanc
-
-    def run(self):
-        print("Bienvenue dans le moteur de jeu Dames!")
-
-        board = Board()
-        board.display()
-
-        while not self.is_game_over():
-            print(f"C'est au tour du joueur {self.joueur_courant.color}.")
-            move = self.joueur_courant.make_move(board)
-
-            while not board.is_valid_move(move):
-                print("Coup invalide. Réessayez.")
-                move = self.joueur_courant.make_move(board)
-
-            board.make_move(move)
-            self.change_joueur()
-            board.display()
-
-        print("Partie terminée!")
+   
 
     def __init__(self, joueur_blanc: BasePlayer, joueur_noir: BasePlayer, taille_plateau: int | None = 8):
         self.plateau = Board(taille=taille_plateau)
