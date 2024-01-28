@@ -16,7 +16,6 @@ class MinMax:
             profondeur (int) : La hauteur du graphe des coups testés (le nombre de coups successifs à tester).
 
         Interface :
-            get_liste_coups_possible(...) : Retourne une liste de tuple des coups possibles d'un joueur.
             evaluate_node() : Retourne la valeur heuristique du plateau actuel (fonction d'évaluation).
             _evaluate(...) : Retourne récursivement la valeur d'un plateau en suivant l'algorithme MinMax.
             evaluate(...) : Initialise l'appel de '_evaluate' et retourne sa valeur.

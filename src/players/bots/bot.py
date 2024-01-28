@@ -68,7 +68,7 @@ class MinMaxBot(BasePlayer):
             minmax_algo = MinMax(plateau=self.plateau, profondeur=self.profondeur, joueur_actuel=self.valeur_pion)
             valeurs_coups[coup] = minmax_algo.evaluate()
             self.plateau.joue(coup[1], coup[0], True)
-        if self.plateau == 1:
+        if self.valeur_pion == 1:
             return max(valeurs_coups)
         return min(valeurs_coups)
 

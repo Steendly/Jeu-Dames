@@ -15,7 +15,6 @@ class GameEngine:
             change_joueur() : Change le joueur courant.
             run() : Fonction principale permettant de joueur une partie.
     """
-   
 
     def __init__(self, joueur_blanc: BasePlayer, joueur_noir: BasePlayer, taille_plateau: int | None = 8):
         self.plateau = Board(taille=taille_plateau)

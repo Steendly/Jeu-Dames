@@ -66,12 +66,14 @@ Voici un petit aperçu :
     Choisissez le joueur blanc:
         1. Joueur Humain (HumanPlayer)
         2. Bot aléatoire (RandomBot)
+        3. Bot MinMax (MinMaxBot)
     --> 1
 
     Choisissez le joueur noir:
         1. Joueur Humain (HumanPlayer)
         2. Bot aléatoire (RandomBot)
-    --> 2
+        3. Bot MinMax (MinMaxBot)
+    --> 3
 
   ───────────────────────────────────────────────────────────────────────────
 
