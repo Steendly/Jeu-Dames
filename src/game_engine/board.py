@@ -22,6 +22,7 @@ class Board:
             get_case(...) : Retourne la valeur de la case spécifiée si valide.
             set_case(...) : Met à jour la valeur d'une case (si valide) avec la valeur spécifiée.
             get_coups_possible(...) : Retourne les coups possibles pouvant être joués par un joueur.
+            get_liste_couops_possible(...) : Retourne les coups possibles d'un joueur sous forme de liste.
             update_coups_possible(...) : Met à jour les coups possibles.
             get_nombre_pions(...) : Retourne le nombre de pions restant d'un joueur sur le plateau.
             update_nombre_pions() : Met à jour le nombre de pions restant sur le plateau de tous les joueurs.
@@ -107,6 +108,26 @@ class Board:
         """
         assert self.joueur_valide(joueur=joueur), "Joueur invalide !"
         return self.coups_possible[joueur]
+
+    def get_liste_coups_possible(self, joueur: int):
+        """
+        Retourne une liste de tuple des coups possibles d'un joueur sur le plateau actuel de la forme :
+        [(case_origine, case_destination), ...] avec 'case_origine' les coordonnées (x, y) de la case d'origine du coup
+        et 'case_destination' les coordonnées (x, y) de la case de destination du coup.
+
+            Paramètre :
+                joueur (int) : La valeur du joueur, 1 pour les blancs et -1 pour les noirs.
+
+            Retourne :
+                list : La liste des coups possible du joueur en question.
+        """
+        assert self.joueur_valide(joueur=joueur)
+        coups_possible = self.get_coups_possible(joueur=joueur)
+        liste_coups_possible = []
+        for case_origine in coups_possible:
+            for case_destination in coups_possible[case_origine]:
+                liste_coups_possible.append((case_origine, case_destination))
+        return liste_coups_possible
 
     def update_coups_possible(self, joueur: int):
         """

@@ -1,6 +1,6 @@
 from src.game_engine.game import GameEngine
 from src.players.player import HumanPlayer
-from src.players.bots.bot import RandomBot
+from src.players.bots.bot import RandomBot, MinMaxBot
 
 
 def choix_joueur(couleur: str):
@@ -17,11 +17,13 @@ def choix_joueur(couleur: str):
     Choisissez le joueur {couleur}:
         1. Joueur Humain (HumanPlayer)
         2. Bot aléatoire (RandomBot)
+        3. Bot MinMax (MinMaxBot)
     --> """
 
     joueurs = {
         "1": HumanPlayer,
-        "2": RandomBot
+        "2": RandomBot,
+        "3": MinMaxBot
     }
 
     choix = input(menu)
