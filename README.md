@@ -46,9 +46,9 @@ algorithmes tels que MinMax et l'élagage alpha-bêta.
 
 ## Utilisation
 
-Pour lancer le projet, exécuter la commande ci-dessous à sa racine :
+Pour lancer le projet, exécutée la commande ci-dessous dans le dossier 'src/':
 ```bash
-python3 -m src.main
+$ python3 main.py
 ```
 
 Voici un petit aperçu :

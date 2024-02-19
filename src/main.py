@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 from src.game_engine.game import GameEngine
 from src.players.player import HumanPlayer
 from src.players.bots.bot import RandomBot, MinMaxBot
