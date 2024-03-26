@@ -4,7 +4,7 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from src.game_engine.game import GameEngine
 from src.players.player import HumanPlayer
-from src.players.bots.bot import RandomBot, MinMaxBot
+from src.players.bots.bot import RandomBot, MinMaxBot, Albator
 
 
 def choix_joueur(couleur: str):
@@ -18,16 +18,18 @@ def choix_joueur(couleur: str):
             BasePlayer : La classe du joueur utilisé.
     """
     menu = f"""
-    Choisissez le joueur {couleur}:
+    Choisissez le joueur {couleur} :
         1. Joueur Humain (HumanPlayer)
         2. Bot aléatoire (RandomBot)
         3. Bot MinMax (MinMaxBot)
+        4. Bot AlphaBeta (Albator)
     --> """
 
     joueurs = {
         "1": HumanPlayer,
         "2": RandomBot,
-        "3": MinMaxBot
+        "3": MinMaxBot,
+        "4": Albator
     }
 
     choix = input(menu)

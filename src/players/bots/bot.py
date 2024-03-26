@@ -2,6 +2,7 @@ import random
 
 from src.players.player import BasePlayer
 from src.players.bots.algorithms.minmax import MinMax
+from src.players.bots.algorithms.alpha_beta import AlphaBeta
 
 
 class RandomBot(BasePlayer):
@@ -47,7 +48,7 @@ class MinMaxBot(BasePlayer):
 
         Interface :
             set_jeu(...) : Met à jour l'attribut 'self.plateau' et 'self.valeur_pion'.
-            joue() : Retourne un coup au hasard parmi les coups possibles pouvant être joué.
+            joue() : Retourne un coup en suivant l'algorithme MinMax.
     """
 
     def __init__(self, nom: str | None = "MinMaxBot", profondeur: int | None = 3):
@@ -73,12 +74,38 @@ class MinMaxBot(BasePlayer):
         return min(valeurs_coups)
 
 
-class Albator:
+class Albator(BasePlayer):
     """
-    Description : Bot implémentant MinMax et l'élagage alpha-bêta.
+    Classe utilisée pour modéliser un bot jouant utilisant l'algorithme AlphaBeta.
 
-    /!\ Non implémentée !
+        Attributs :
+            nom (str) : Le nom du joueur.
+            plateau (Board) : Le plateau de jeu sur lequel joue le bot.
+            valeur_pion (int) : La valeur du pion du joueur.
+            profondeur (int) : La hauteur du graphe des coups testés (le nombre de coups successifs à tester).
+
+        Interface :
+            set_jeu(...) : Met à jour l'attribut 'self.plateau' et 'self.valeur_pion'.
+            joue() : Retourne un coup en suivant l'algorithme AlphaBeta.
     """
+    def __init__(self, nom: str | None = "Albator", profondeur: int | None = 3):
+        super().__init__(nom)
+        self.profondeur = profondeur
 
-    def __init__(self):
-        raise NotImplemented("Classe no implémentée !")
+    def joue(self):
+        """
+        Retourne un coup au hasard parmi les coups pouvant être joué, c'est-à-dire un couple aléatoire
+        (case_origne, case_destination) provenant des coups possibles du joueur.
+
+            Retourne :
+                tuple : Retourne un tuple (case_origne, case_destination) aléatoire des coups possibles.
+        """
+        valeurs_coups = {}
+        for coup in self.plateau.get_liste_coups_possible(joueur=self.valeur_pion):
+            self.plateau.joue(case_origine=coup[0], case_destination=coup[1])
+            alphabeta_algo = AlphaBeta(plateau=self.plateau, profondeur=self.profondeur, joueur_actuel=self.valeur_pion)
+            valeurs_coups[coup] = alphabeta_algo.evaluate()
+            self.plateau.joue(coup[1], coup[0], True)
+        if self.valeur_pion == 1:
+            return max(valeurs_coups)
+        return min(valeurs_coups)
